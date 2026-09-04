@@ -1,0 +1,396 @@
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -929,6 +929,7 @@
+   const [activeEpisode, setActiveEpisode] = useState<ActiveEpisode | null>(null);
+   const [nickname, setNickname] = useState("");
+   const [joinCode, setJoinCode] = useState("");
++  const [pendingInviteCode, setPendingInviteCode] = useState("");
+   const [roomDialogOpen, setRoomDialogOpen] = useState(false);
+   const [dialogMode, setDialogMode] = useState<"create" | "join" | "invite" | "rename">("create");
+   const [roomRequestBusy, setRoomRequestBusy] = useState(false);
+@@ -1186,6 +1187,7 @@
+     setRoomCode(code);
+     setNickname(name);
+     setMemberId(nextMember.id);
++    setPendingInviteCode("");
+     applyRoomSnapshot(nextRoom);
+     setRoomDialogOpen(false);
+     setRoomError("");
+@@ -1194,6 +1196,7 @@
+   const openRoomDialog = useCallback((mode: "create" | "join" | "invite" | "rename") => {
+     setDialogMode(mode);
+     if (mode === "join" && roomCode) setJoinCode(roomCode);
++    if (mode === "create" && !roomCode) setPendingInviteCode("");
+     if (mode === "rename") {
+       setRenameDraft(currentMember?.nickname ?? nickname);
+       setRenameBusy(false);
+@@ -1739,6 +1742,7 @@
+     const freshNickname = createRandomNickname();
+     setNickname(freshNickname);
+     sessionStorage.removeItem(LEGACY_NICKNAME_STORAGE_KEY);
++    setPendingInviteCode(queryCode);
+     if (queryCode) setJoinCode(queryCode);
+     if (bootstrapRef.current) return;
+     bootstrapRef.current = true;
+@@ -1789,6 +1793,7 @@
+           || freshNickname;
+         setNickname(restoredNickname);
+         sessionStorage.setItem(nicknameStorageKey(restored.code), restoredNickname);
++        setPendingInviteCode("");
+         applyRoomSnapshot(restored);
+         setRoomDialogOpen(false);
+       })
+@@ -2538,8 +2543,17 @@
+     };
+   }, [activeEpisode]);
+ 
++  const activePendingInviteCode = !room && pendingInviteCode ? pendingInviteCode : "";
++  const isPreRoom = !room;
++  const preRoomTitle = activePendingInviteCode
++    ? `房间 ${activePendingInviteCode} 正在等你`
++    : "先进入一个观影房";
++  const preRoomDescription = activePendingInviteCode
++    ? "邀请链接已经识别，只需要确认昵称；加入后会自动连接房间当前的播放进度。"
++    : "创建一个新房间，或者输入朋友分享的房间码。进入后再选择影片、聊天和同步播放。";
++
+   return (
+-    <main className="maku-app">
++    <main className={`maku-app ${isPreRoom ? "pre-room" : ""}`} data-room-state={room ? "joined" : activePendingInviteCode ? "invited" : "empty"}>
+       <header className="topbar">
+         <div className="brand-lockup" aria-label="幕友">
+           <span className="brand-mark"><Clapperboard size={19} /></span>
+@@ -2554,8 +2568,11 @@
+         </nav>
+ 
+         <div className="topbar-actions">
+-          <div className="room-mini-status"><span className={`live-dot ${connectionState === "connected" ? "" : "muted"}`} />{roomCode ? `房间 ${roomCode}` : "未进入房间"}</div>
+-          <Button className="invite-button" size="sm" onClick={() => openRoomDialog(roomCode ? "invite" : "create")}><Share2 size={15} />{roomCode ? "邀请朋友" : "进入房间"}</Button>
++          <div className="room-mini-status"><span className={`live-dot ${connectionState === "connected" ? "" : "muted"}`} />{roomCode ? `房间 ${roomCode}` : activePendingInviteCode ? `邀请 ${activePendingInviteCode}` : "未进入房间"}</div>
++          <Button className="invite-button" size="sm" onClick={() => openRoomDialog(roomCode ? "invite" : activePendingInviteCode ? "join" : "create")}>
++            {roomCode ? <Share2 size={15} /> : <Users size={15} />}
++            {roomCode ? "邀请朋友" : activePendingInviteCode ? "加入房间" : "进入房间"}
++          </Button>
+           <DropdownMenu>
+             <DropdownMenuTrigger asChild>
+               <Button className="icon-button" variant="ghost" size="icon" aria-label="打开更多操作"><MoreHorizontal size={18} /></Button>
+@@ -2576,18 +2593,29 @@
+       <section className="workspace-shell" id="watch">
+         <div className="workspace-heading">
+           <div>
+-            <div className="eyebrow"><span className={`live-dot ${connectionState === "connected" ? "" : "muted"}`} />ROOM / {roomCode || "—"}<span className="eyebrow-divider">·</span><span className="muted-eyebrow">{room ? "实时观影房" : "先创建或加入房间"}</span></div>
+-            <h1>今晚看点什么？</h1>
+-            <p className="heading-copy">和朋友在同一条时间线上，把每一帧都留给一起笑的人。</p>
++            <div className="eyebrow"><span className={`live-dot ${connectionState === "connected" ? "" : "muted"}`} />ROOM / {roomCode || activePendingInviteCode || "—"}<span className="eyebrow-divider">·</span><span className="muted-eyebrow">{room ? "实时观影房" : activePendingInviteCode ? "邀请已识别 · 等待加入" : "先创建或加入房间"}</span></div>
++            <h1>{activePendingInviteCode ? `准备加入 ${activePendingInviteCode}` : "今晚看点什么？"}</h1>
++            <p className="heading-copy">{activePendingInviteCode ? "房间链接有效，输入昵称就可以加入朋友当前的观影进度。" : "和朋友在同一条时间线上，把每一帧都留给一起笑的人。"}</p>
+           </div>
+           <div className="heading-actions">
+-            <div className={`sync-pill ${connectionState === "error" ? "sync-pill-error" : ""}`}><Wifi size={14} />{connectionLabel}</div>
+-            <Button variant="outline" onClick={() => openRoomDialog(roomCode ? "invite" : "join")} disabled={!roomCode}><Users size={16} />{members.length} 人在线</Button>
++            <div className={`sync-pill ${connectionState === "error" ? "sync-pill-error" : ""}`}><Wifi size={14} />{activePendingInviteCode ? "邀请已识别" : connectionLabel}</div>
++            {roomCode ? <Button variant="outline" onClick={() => openRoomDialog("invite")}><Users size={16} />{members.length} 人在线</Button> : activePendingInviteCode ? <Button onClick={() => openRoomDialog("join")}><Users size={16} />加入房间</Button> : null}
+           </div>
+         </div>
+ 
+         {roomError && <div className="room-alert" role="status"><AlertTriangle size={16} /><span>{roomError}</span><button type="button" onClick={() => setRoomError("")} aria-label="关闭提示"><X size={15} /></button></div>}
+ 
++        {isPreRoom && <section className={`pre-room-callout ${activePendingInviteCode ? "invited" : ""}`} aria-label="进入观影房">
++          <div className="pre-room-callout-copy">
++            <span className="section-kicker">{activePendingInviteCode ? "INVITE READY" : "ROOM FIRST"}</span>
++            <h2>{preRoomTitle}</h2>
++            <p>{preRoomDescription}</p>
++          </div>
++          <div className="pre-room-callout-actions">
++            {activePendingInviteCode ? <Button onClick={() => openRoomDialog("join")}><Users size={16} />输入昵称并加入</Button> : <><Button onClick={() => openRoomDialog("create")}><Plus size={16} />创建房间</Button><Button variant="outline" onClick={() => openRoomDialog("join")}><Users size={16} />加入已有房间</Button></>}
++          </div>
++        </section>}
++
+         <div className="watch-layout">
+           <section className="watch-column" aria-label="播放器">
+             <div ref={playerAnchorRef} className={`mobile-player-anchor ${isMobilePlayerDocked ? "is-docked" : ""}`}>
+@@ -2892,11 +2920,11 @@
+             <div className="dialog-tip"><CheckCircle2 size={16} /><span>修改后会继续使用当前 member ID，不会离开或重新加入房间。</span></div>
+             <DialogFooter><Button type="button" variant="outline" onClick={() => setRoomDialogOpen(false)} disabled={renameBusy}>取消</Button><Button type="submit" disabled={renameBusy}>{renameBusy ? <><LoaderCircle size={15} className="spin" />同步中</> : <><Pencil size={15} />保存昵称</>}</Button></DialogFooter>
+           </form> : <>
+-            <DialogHeader><DialogTitle>{dialogMode === "create" ? "新建观影房" : "加入观影房"}</DialogTitle><DialogDescription>{dialogMode === "create" ? "创建一个真实房间，之后可以把链接发给朋友。" : "输入朋友分享的房间码和你的昵称，加入他们当前的播放进度。"}</DialogDescription></DialogHeader>
++            <DialogHeader><DialogTitle>{dialogMode === "create" ? "新建观影房" : activePendingInviteCode ? `加入 ${activePendingInviteCode}` : "加入观影房"}</DialogTitle><DialogDescription>{dialogMode === "create" ? "创建一个真实房间，之后可以把链接发给朋友。" : activePendingInviteCode ? "邀请房间已经识别，确认昵称后就会连接朋友当前的播放进度。" : "输入朋友分享的房间码和你的昵称，加入他们当前的播放进度。"}</DialogDescription></DialogHeader>
+             <label className="field-label">你的昵称<Input name="maku-display-name" value={nickname} onChange={(event) => setNickname(event.target.value)} placeholder="例如：A7K9Q2" maxLength={32} autoComplete="off" data-1p-ignore autoFocus /></label>
+-            {dialogMode === "join" && <label className="field-label">房间码<Input name="maku-room-code" value={joinCode} onChange={(event) => setJoinCode(normalizeCode(event.target.value))} placeholder="例如：K7M9Q2" maxLength={8} autoComplete="off" data-1p-ignore autoCapitalize="characters" spellCheck={false} /></label>}
++            {dialogMode === "join" && (activePendingInviteCode ? <div className="join-target-panel"><span>准备加入</span><strong>{activePendingInviteCode}</strong><CheckCircle2 size={16} /></div> : <label className="field-label">房间码<Input name="maku-room-code" value={joinCode} onChange={(event) => setJoinCode(normalizeCode(event.target.value))} placeholder="例如：K7M9Q2" maxLength={8} autoComplete="off" data-1p-ignore autoCapitalize="characters" spellCheck={false} /></label>)}
+             <div className="dialog-tip"><CheckCircle2 size={16} /><span>你的身份会保存在当前浏览器的会话中，短暂断线后会继续使用同一个成员身份。</span></div>
+-            <DialogFooter><Button variant="outline" onClick={() => openRoomDialog(dialogMode === "create" ? "join" : "create")} disabled={roomRequestBusy}>{dialogMode === "create" ? <><Users size={15} />加入已有房间</> : <><Plus size={15} />新建房间</>}</Button><Button onClick={dialogMode === "create" ? createRoom : joinRoom} disabled={roomRequestBusy}>{roomRequestBusy ? <><LoaderCircle size={15} className="spin" />处理中</> : dialogMode === "create" ? <><Plus size={15} />创建房间</> : <><Users size={15} />加入房间</>}</Button></DialogFooter>
++            {dialogMode === "join" && activePendingInviteCode ? <div className="invite-join-actions"><Button className="invite-join-primary" onClick={joinRoom} disabled={roomRequestBusy}>{roomRequestBusy ? <><LoaderCircle size={15} className="spin" />处理中</> : <><Users size={15} />加入房间</>}</Button><button type="button" className="dialog-text-action" onClick={() => { setPendingInviteCode(""); setJoinCode(""); }} disabled={roomRequestBusy}>改用其他房间码</button></div> : <DialogFooter><Button variant="outline" onClick={() => openRoomDialog(dialogMode === "create" ? "join" : "create")} disabled={roomRequestBusy}>{dialogMode === "create" ? <><Users size={15} />加入已有房间</> : <><Plus size={15} />新建房间</>}</Button><Button onClick={dialogMode === "create" ? createRoom : joinRoom} disabled={roomRequestBusy}>{roomRequestBusy ? <><LoaderCircle size={15} className="spin" />处理中</> : dialogMode === "create" ? <><Plus size={15} />创建房间</> : <><Users size={15} />加入房间</>}</Button></DialogFooter>}
+           </>}
+         </DialogContent>
+       </Dialog>
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -925,6 +925,65 @@
+   background: rgba(239, 120, 109, 0.12);
+ }
+ 
++.pre-room-callout {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 24px;
++  margin: 0 0 18px;
++  padding: 18px 20px;
++  border: 1px solid rgba(137, 164, 160, 0.18);
++  border-radius: 16px;
++  background: linear-gradient(135deg, rgba(24, 35, 42, 0.96), rgba(15, 24, 29, 0.92));
++  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
++}
++
++.pre-room-callout.invited {
++  border-color: rgba(214, 246, 107, 0.26);
++  background: linear-gradient(135deg, rgba(214, 246, 107, 0.09), rgba(20, 31, 35, 0.96));
++}
++
++.pre-room-callout-copy {
++  min-width: 0;
++}
++
++.pre-room-callout h2 {
++  margin: 5px 0 4px;
++  color: #eef7ef;
++  font-size: 18px;
++  letter-spacing: -0.02em;
++}
++
++.pre-room-callout p {
++  max-width: 660px;
++  margin: 0;
++  color: #8fa09c;
++  font-size: 12px;
++  line-height: 1.65;
++}
++
++.pre-room-callout-actions {
++  display: flex;
++  flex: 0 0 auto;
++  align-items: center;
++  gap: 9px;
++}
++
++.pre-room .watch-layout {
++  grid-template-columns: minmax(0, 1fr);
++}
++
++.pre-room .chat-card,
++.pre-room .danmaku-panel,
++.pre-room .episodes-section,
++.pre-room .catalog-section {
++  display: none;
++}
++
++.pre-room .now-playing-actions {
++  display: none;
++}
++
+ .video-controls {
+   bottom: 21px;
+   transition: transform 240ms ease, opacity 180ms ease;
+@@ -2556,8 +2615,11 @@
+ }
+ 
+ .room-dialog {
+-  max-width: 450px;
++  width: min(450px, calc(100vw - 24px));
++  max-width: calc(100vw - 24px);
++  min-width: 0;
+   gap: 20px;
++  overflow-x: hidden;
+   border-color: #2d3e45;
+   border-radius: 20px;
+   background: #141d24;
+@@ -2567,9 +2629,15 @@
+ 
+ .room-dialog > form {
+   display: grid;
++  min-width: 0;
+   gap: 20px;
+ }
+ 
++.room-dialog [data-slot="dialog-header"],
++.room-dialog [data-slot="dialog-footer"] {
++  min-width: 0;
++}
++
+ .room-dialog [data-slot="dialog-title"] {
+   color: #f0f8f1;
+   font-size: 21px;
+@@ -2651,11 +2719,14 @@
+ 
+ .field-label {
+   display: flex;
++  min-width: 0;
+   flex-direction: column;
+   gap: 8px;
+ }
+ 
+ .field-label input {
++  width: 100%;
++  min-width: 0;
+   height: 42px;
+   border-color: #304149;
+   color: #eaf4ed;
+@@ -2684,6 +2755,65 @@
+   color: #b7e773;
+ }
+ 
++.join-target-panel {
++  display: flex;
++  min-width: 0;
++  align-items: center;
++  gap: 10px;
++  padding: 12px 13px;
++  border: 1px solid rgba(214, 246, 107, 0.22);
++  border-radius: 10px;
++  background: rgba(214, 246, 107, 0.06);
++}
++
++.join-target-panel > span {
++  color: #859691;
++  font-size: 11px;
++}
++
++.join-target-panel strong {
++  min-width: 0;
++  overflow: hidden;
++  color: #e3f8a8;
++  font-family: var(--font-mono);
++  font-size: 16px;
++  letter-spacing: 0.16em;
++  text-overflow: ellipsis;
++}
++
++.join-target-panel svg {
++  flex: 0 0 auto;
++  margin-left: auto;
++  color: #b7e773;
++}
++
++.invite-join-actions {
++  display: grid;
++  gap: 10px;
++}
++
++.invite-join-primary {
++  width: 100%;
++}
++
++.dialog-text-action {
++  justify-self: center;
++  padding: 2px 6px;
++  border: 0;
++  color: #83938e;
++  background: transparent;
++  font-size: 11px;
++}
++
++.dialog-text-action:hover {
++  color: #d6f66b;
++}
++
++.dialog-text-action:disabled {
++  cursor: default;
++  opacity: 0.55;
++}
++
+ .room-dialog [data-slot="dialog-footer"] .outline {
+   border-color: #33454b;
+   color: #9fafaa;
+@@ -2792,18 +2922,36 @@
+   }
+ 
+   .topbar {
++    width: 100%;
++    min-width: 0;
+     min-height: 64px;
+     gap: 12px;
+     padding-right: max(12px, env(safe-area-inset-right));
+     padding-left: max(12px, env(safe-area-inset-left));
+   }
+ 
++  .brand-lockup,
+   .topbar-actions {
++    min-width: 0;
++  }
++
++  .topbar-actions {
++    margin-left: auto;
+     gap: 8px;
+   }
+ 
++  .brand-sub {
++    display: none;
++  }
++
++  .pre-room .profile-button {
++    display: none;
++  }
++
+   .invite-button {
++    min-width: 0;
+     padding-inline: 10px;
++    white-space: nowrap;
+   }
+ 
+   .invite-button svg {
+@@ -2816,6 +2964,28 @@
+ 
+   .heading-actions {
+     justify-content: space-between;
++    flex-wrap: wrap;
++  }
++
++  .heading-actions > * {
++    min-width: 0;
++  }
++
++  .pre-room-callout {
++    align-items: stretch;
++    flex-direction: column;
++    gap: 14px;
++    padding: 16px;
++  }
++
++  .pre-room-callout-actions {
++    width: 100%;
++    align-items: stretch;
++    flex-direction: column;
++  }
++
++  .pre-room-callout-actions > * {
++    width: 100%;
+   }
+ 
+   .video-stage {
+@@ -3036,11 +3206,26 @@
+   .room-dialog {
+     width: calc(100vw - 24px);
+     max-width: none;
++    min-width: 0;
+     max-height: calc(100svh - 24px);
++    overflow-x: hidden;
+     overflow-y: auto;
+     padding: 20px;
+   }
+ 
++  .room-dialog [data-slot="dialog-footer"] {
++    width: 100%;
++  }
++
++  .room-dialog [data-slot="dialog-footer"] > button {
++    width: 100%;
++  }
++
++  .invite-code-row {
++    align-items: flex-start;
++    flex-wrap: wrap;
++  }
++
+   .footer-right {
+     width: 100%;
+     margin-left: 0;
