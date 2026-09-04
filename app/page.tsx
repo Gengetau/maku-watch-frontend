@@ -83,7 +83,7 @@ const WS_PING_INTERVAL_MS = 28_000;
 const SOURCE_RETRY_DELAYS_MS = [1_000, 3_000, 10_000];
 const HLS_FORWARD_BUFFER_SECONDS = 60;
 const STARTUP_BUFFER_SECONDS = 7;
-const STALL_RECOVERY_BUFFER_SECONDS = 5;
+const STALL_LOCAL_RESUME_BUFFER_SECONDS = 1;
 const BUFFER_CHECK_INTERVAL_MS = 250;
 const FOLLOWER_FRAME_CHECK_INTERVAL_MS = 1_000;
 const FOLLOWER_FRAME_STALL_MS = 2_500;
@@ -2144,13 +2144,18 @@ export default function Home() {
         clearRebuffering();
         return;
       }
-      const target = mediaMatchesPlayback(resolvedMedia.key, current)
-        ? predictedPosition(current, serverOffsetRef.current)
-        : video.currentTime;
-      if (!hasBufferedAhead(video, STALL_RECOVERY_BUFFER_SECONDS, target)) return;
+
+      // A media `waiting` event already stops frame progression by itself. Do not
+      // keep the player paused while waiting for an ever-advancing room target to
+      // become buffered: progressive MP4 origins may stop extending their range
+      // while paused, which can deadlock recovery permanently. Resume from the
+      // locally playable position first; normal room sync can correct drift after
+      // media progression has restarted.
+      const locallyPlayable = video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA
+        || hasBufferedAhead(video, STALL_LOCAL_RESUME_BUFFER_SECONDS, video.currentTime);
+      if (!locallyPlayable) return;
       clearRebuffering();
-      if (Math.abs(video.currentTime - target) > 0.25) video.currentTime = target;
-      void video.play().catch(() => setAutoplayBlocked(true));
+      if (video.paused) void video.play().catch(() => setAutoplayBlocked(true));
     };
     const checkBuffer = () => {
       if (!readyMarked) finishStartupBuffer();
@@ -2161,15 +2166,12 @@ export default function Home() {
       rebufferingRef.current = true;
       setIsRebuffering(true);
       setAutoplayBlocked(false);
-      video.pause();
     };
-    const handleUnexpectedPlaying = () => {
+    const handlePlaying = () => {
       if (!rebufferingRef.current) return;
       const current = playbackRef.current;
-      const target = mediaMatchesPlayback(resolvedMedia.key, current)
-        ? predictedPosition(current, serverOffsetRef.current)
-        : video.currentTime;
-      if (!hasBufferedAhead(video, STALL_RECOVERY_BUFFER_SECONDS, target)) video.pause();
+      clearRebuffering();
+      if (current.paused && !video.paused) video.pause();
     };
     const handleVideoError = () => {
       if (!cancelled) retryCurrentResolve();
@@ -2182,7 +2184,7 @@ export default function Home() {
     video.addEventListener("canplaythrough", checkBuffer);
     video.addEventListener("waiting", handleWaiting);
     video.addEventListener("stalled", handleWaiting);
-    video.addEventListener("playing", handleUnexpectedPlaying);
+    video.addEventListener("playing", handlePlaying);
     const bufferCheckTimer = window.setInterval(checkBuffer, BUFFER_CHECK_INTERVAL_MS);
 
     if (resolvedMedia.kind === "hls") {
@@ -2266,7 +2268,7 @@ export default function Home() {
       video.removeEventListener("canplaythrough", checkBuffer);
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("stalled", handleWaiting);
-      video.removeEventListener("playing", handleUnexpectedPlaying);
+      video.removeEventListener("playing", handlePlaying);
       rebufferingRef.current = false;
       if (hlsRef.current) {
         hlsRef.current.destroy();
@@ -2294,7 +2296,15 @@ export default function Home() {
     if (!video || !resolvedMedia || !videoReady) return;
     if (!mediaMatchesPlayback(resolvedMedia.key, playback)) return;
     const target = predictedPosition(playback, serverOffsetRef.current);
-    if (Math.abs(video.currentTime - target) > 1.1) video.currentTime = target;
+    // While the media pipeline is rebuffering, let it regain forward progress
+    // before applying room-time correction. Seeking every authoritative update
+    // during a discontinuity can turn a short decoder transition into a retry
+    // loop of waiting/pause/seek events.
+    if (!rebufferingRef.current
+      && video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA
+      && Math.abs(video.currentTime - target) > 1.1) {
+      video.currentTime = target;
+    }
     if (Math.abs(video.playbackRate - playback.playbackRate) > 0.01) video.playbackRate = playback.playbackRate;
     setPlaybackRate(playback.playbackRate);
     if (playback.paused) {
@@ -2664,7 +2674,7 @@ export default function Home() {
                 </div>}
                 {!videoReady && !sourceError && mediaState === "resolving" && <div className="media-status"><LoaderCircle size={17} className="spin" />正在解析片源…</div>}
                 {!videoReady && !sourceError && mediaState === "loading" && <div className="media-status"><LoaderCircle size={17} className="spin" />正在预缓冲（目标 {STARTUP_BUFFER_SECONDS} 秒）…</div>}
-                {videoReady && isRebuffering && <div className="media-status"><LoaderCircle size={17} className="spin" />网络波动，缓冲 {STALL_RECOVERY_BUFFER_SECONDS} 秒后继续…</div>}
+                {videoReady && isRebuffering && <div className="media-status"><LoaderCircle size={17} className="spin" />播放缓冲中，正在自动恢复…</div>}
                 {sourceError && <div className="media-error-panel" role="alert">
                   <AlertTriangle size={18} />
                   <div className="media-error-copy"><strong>{sourceErrorTitle(sourceError.code)}</strong><span>{sourceError.message}</span>{sourceError.challengeUrl && <a href={sourceError.challengeUrl} target="_blank" rel="noreferrer">打开验证页面 <ArrowUpRight size={13} /></a>}</div>
