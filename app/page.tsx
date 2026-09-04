@@ -77,6 +77,7 @@ const MEMBER_STORAGE_KEY_PREFIX = "maku-watch.member-id";
 const LEGACY_MEMBER_STORAGE_KEY = "maku-watch.member-id";
 const LEGACY_NICKNAME_STORAGE_KEY = "maku-watch.nickname";
 const NICKNAME_STORAGE_KEY_PREFIX = "maku-watch.nickname";
+const CHAT_STORAGE_KEY_PREFIX = "maku-watch.chat";
 const CLIENT_ID_STORAGE_KEY = "maku-watch.client-id";
 const RECONNECT_WINDOW_MS = 20_000;
 const WS_PING_INTERVAL_MS = 28_000;
@@ -354,6 +355,32 @@ function memberStorageKey(roomCode: string): string {
 
 function nicknameStorageKey(roomCode: string): string {
   return `${NICKNAME_STORAGE_KEY_PREFIX}:${normalizeCode(roomCode)}`;
+}
+
+function chatStorageKey(roomCode: string): string {
+  return `${CHAT_STORAGE_KEY_PREFIX}:${normalizeCode(roomCode)}`;
+}
+
+function loadStoredChatMessages(roomCode: string): ChatMessage[] {
+  if (!roomCode) return [];
+  try {
+    const raw = sessionStorage.getItem(chatStorageKey(roomCode));
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is ChatMessage => {
+      if (!isRecord(item)) return false;
+      return typeof item.id === "string"
+        && typeof item.memberId === "string"
+        && typeof item.name === "string"
+        && typeof item.time === "string"
+        && typeof item.text === "string"
+        && typeof item.color === "string"
+        && (item.kind === "chat" || item.kind === "danmaku")
+        && (item.self === undefined || typeof item.self === "boolean");
+    }).slice(-100);
+  } catch {
+    return [];
+  }
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -1185,6 +1212,7 @@ export default function Home() {
     localOverridePlaybackKeyRef.current = null;
     window.history.replaceState({}, "", `${window.location.pathname}?room=${encodeURIComponent(code)}`);
     setRoomCode(code);
+    setChatMessages(loadStoredChatMessages(code));
     setNickname(name);
     setMemberId(nextMember.id);
     setPendingInviteCode("");
@@ -1787,6 +1815,7 @@ export default function Home() {
         }
         sessionStorage.setItem(ROOM_STORAGE_KEY, restored.code);
         setRoomCode(restored.code);
+        setChatMessages(loadStoredChatMessages(restored.code));
         setMemberId(storedMember);
         const restoredNickname = restoredMember.nickname
           || sessionStorage.getItem(nicknameStorageKey(restored.code))
@@ -1811,6 +1840,15 @@ export default function Home() {
       cancelled = true;
     };
   }, [applyRoomSnapshot]);
+
+  useEffect(() => {
+    if (!roomCode) return;
+    try {
+      sessionStorage.setItem(chatStorageKey(roomCode), JSON.stringify(chatMessages.slice(-100)));
+    } catch {
+      // Session storage is best-effort; live room messaging must keep working if it is unavailable.
+    }
+  }, [chatMessages, roomCode]);
 
   useEffect(() => {
     if (!roomCode || !memberId) {
