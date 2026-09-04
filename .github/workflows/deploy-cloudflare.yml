@@ -48,7 +48,15 @@ jobs:
           npm test
 
       - name: Deploy Worker and static assets
+        shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx wrangler deploy --config dist/server/wrangler.json --name maku-watch
+          MAYBE_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -n "${MAYBE_CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            export CLOUDFLARE_ACCOUNT_ID="$MAYBE_CLOUDFLARE_ACCOUNT_ID"
+          else
+            unset CLOUDFLARE_ACCOUNT_ID || true
+          fi
+          npx wrangler deploy --config dist/server/wrangler.json --name maku-watch
