@@ -2206,6 +2206,7 @@ export default function Home() {
       setAutoplayBlocked(false);
     };
     const handlePlaying = () => {
+      if (!playbackRef.current.paused) setAutoplayBlocked(false);
       if (!rebufferingRef.current) return;
       const current = playbackRef.current;
       clearRebuffering();
