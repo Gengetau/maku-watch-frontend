@@ -91,3 +91,15 @@ The timeout defaults can be overridden for a controlled canary with `SITES_INSTA
 
 - [vinext Documentation](https://github.com/cloudflare/vinext)
 - [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+
+## 外观与背景
+
+顶部调色盘按钮可以打开「布置你的放映室」：
+
+- 内置原创「樱海暮色」壁纸与纯净夜色背景。
+- 支持 JPG、PNG、WebP 本地图片（最大 10 MB），在浏览器内缩小至最长边 1920 像素后保存；不会上传图片到服务端。
+- 支持公开的 HTTPS 图片直链，加载失败时保留当前背景。
+- 遮罩深度和背景虚化可调，并支持恢复默认。
+- 偏好仅保存在当前浏览器的 `maku-watch.appearance.v1` 中，与房间、成员身份和聊天存储分离；存储不可用时会提示无法持久保存。
+
+`public/backgrounds/twilight.webp` 为本项目生成的原创动漫海岸暮色背景，不依赖外部图床；它同时用于未播放时的播放器封面。全屏视频不叠加网站背景遮罩。
