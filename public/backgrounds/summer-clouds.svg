@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="summerSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f2b69"/>
+      <stop offset="25%" stop-color="#1d4ed8"/>
+      <stop offset="65%" stop-color="#38bdf8"/>
+      <stop offset="90%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#f0f9ff"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="25%" cy="20%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="20%" stop-color="#fef08a" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#fdba74" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cloudShadow1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdf4ff"/>
+      <stop offset="60%" stop-color="#e0e7ff"/>
+      <stop offset="100%" stop-color="#c7d2fe"/>
+    </linearGradient>
+    <linearGradient id="cloudShadow2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="70%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#summerSky)"/>
+
+  <!-- Sun rays & radiant glare -->
+  <circle cx="480" cy="180" r="320" fill="url(#sunGlow)"/>
+  <circle cx="480" cy="180" r="48" fill="#ffffff" filter="url(#softGlow)"/>
+
+  <!-- Sun flare sparkles -->
+  <path d="M480,120 L483,177 L540,180 L483,183 L480,240 L477,183 L420,180 L477,177 Z" fill="#ffffff" opacity="0.8"/>
+  <circle cx="560" cy="220" r="4" fill="#fef08a" opacity="0.6"/>
+  <circle cx="620" cy="250" r="6" fill="#67e8f9" opacity="0.4"/>
+  <circle cx="400" cy="140" r="5" fill="#f472b6" opacity="0.3"/>
+
+  <!-- Distant Cumulonimbus (Towering Clouds) -->
+  <g fill="url(#cloudShadow1)" opacity="0.95">
+    <path d="M780,680 Q880,480 1020,500 Q1120,380 1280,410 Q1420,320 1580,360 Q1720,440 1780,560 Q1860,540 1920,620 L1920,1080 L720,1080 Q730,760 780,680 Z"/>
+  </g>
+
+  <!-- Mid-layer Fluffy Anime Cloud Billows -->
+  <g fill="url(#cloudShadow2)">
+    <path d="M0,740 Q90,620 220,640 Q310,540 450,560 Q560,460 720,490 Q850,420 990,470 Q1120,560 1190,690 L1220,1080 L0,1080 Z"/>
+  </g>
+
+  <!-- Cloud Highlights (Brilliant Sunlit Rims) -->
+  <path d="M220,640 Q310,540 450,560 Q560,460 720,490 Q850,420 990,470" fill="none" stroke="#ffffff" stroke-width="4" filter="url(#softGlow)"/>
+  <path d="M1120,380 Q1280,410 1420,320 Q1580,360 1720,440" fill="none" stroke="#ffffff" stroke-width="5" filter="url(#softGlow)"/>
+
+  <!-- Anime Wind Currents / Birds in distance -->
+  <g stroke="rgba(30, 58, 138, 0.45)" stroke-width="2" fill="none" stroke-linecap="round">
+    <!-- Flying birds -->
+    <path d="M340,320 Q348,312 356,320 Q364,312 372,320"/>
+    <path d="M370,335 Q376,329 382,335 Q388,329 394,335"/>
+    <path d="M320,345 Q325,340 330,345 Q335,340 340,345"/>
+
+    <path d="M1280,240 Q1287,233 1294,240 Q1301,233 1308,240"/>
+    <path d="M1310,252 Q1315,247 1320,252 Q1325,247 1330,252"/>
+  </g>
+</svg>

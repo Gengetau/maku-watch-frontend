@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070512"/>
+      <stop offset="35%" stop-color="#120c24"/>
+      <stop offset="70%" stop-color="#180e30"/>
+      <stop offset="100%" stop-color="#0a1226"/>
+    </linearGradient>
+    <radialGradient id="nebula1" cx="30%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#ec4899" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#070512" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebula2" cx="75%" cy="30%" r="45%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.28"/>
+      <stop offset="45%" stop-color="#6366f1" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#070512" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebula3" cx="50%" cy="85%" r="40%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.2"/>
+      <stop offset="60%" stop-color="#1e1b4b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fdf4ff" stop-opacity="0.9"/>
+      <stop offset="25%" stop-color="#f5d0fe" stop-opacity="0.4"/>
+      <stop offset="60%" stop-color="#c084fc" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#070512" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+  <rect width="1920" height="1080" fill="url(#nebula1)"/>
+  <rect width="1920" height="1080" fill="url(#nebula2)"/>
+  <rect width="1920" height="1080" fill="url(#nebula3)"/>
+
+  <!-- Subtle anime horizon silhouette -->
+  <path d="M0,880 Q480,820 960,860 T1920,850 L1920,1080 L0,1080 Z" fill="#130e29" opacity="0.6"/>
+  <path d="M0,940 Q550,890 1100,920 T1920,900 L1920,1080 L0,1080 Z" fill="#0c091a" opacity="0.8"/>
+
+  <!-- Celestial Crescent Moon -->
+  <circle cx="1520" cy="240" r="160" fill="url(#moonGlow)"/>
+  <circle cx="1520" cy="240" r="42" fill="#fff5fe" filter="url(#glow)"/>
+  <circle cx="1540" cy="230" r="38" fill="#1b1238" opacity="0.88"/>
+
+  <!-- Shooting star streak -->
+  <path d="M400,120 L680,260" stroke="#fbcfe8" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+  <circle cx="680" cy="260" r="2.5" fill="#ffffff" filter="url(#glow)"/>
+
+  <!-- Constellation lines -->
+  <g stroke="rgba(216, 180, 254, 0.28)" stroke-width="1" stroke-dasharray="2,3">
+    <line x1="280" y1="220" x2="360" y2="180"/>
+    <line x1="360" y1="180" x2="440" y2="240"/>
+    <line x1="440" y1="240" x2="520" y2="210"/>
+    <line x1="520" y1="210" x2="600" y2="290"/>
+
+    <line x1="1080" y1="180" x2="1140" y2="230"/>
+    <line x1="1140" y1="230" x2="1240" y2="190"/>
+    <line x1="1240" y1="190" x2="1320" y2="270"/>
+  </g>
+
+  <!-- Key stars & sparkles -->
+  <g fill="#ffffff">
+    <circle cx="280" cy="220" r="2.5" filter="url(#glow)"/>
+    <circle cx="360" cy="180" r="3" filter="url(#glow)"/>
+    <circle cx="440" cy="240" r="2" filter="url(#glow)"/>
+    <circle cx="520" cy="210" r="3" filter="url(#glow)"/>
+    <circle cx="600" cy="290" r="2.5" filter="url(#glow)"/>
+
+    <circle cx="1080" cy="180" r="2.5" filter="url(#glow)"/>
+    <circle cx="1140" cy="230" r="3" filter="url(#glow)"/>
+    <circle cx="1240" cy="190" r="2" filter="url(#glow)"/>
+    <circle cx="1320" cy="270" r="3.5" filter="url(#glow)"/>
+
+    <!-- 4-point sparkle anime stars -->
+    <path d="M820,160 Q820,175 835,175 Q820,175 820,190 Q820,175 805,175 Q820,175 820,160 Z" fill="#fbcfe8" filter="url(#glow)"/>
+    <path d="M1680,380 Q1680,390 1690,390 Q1680,390 1680,400 Q1680,390 1670,390 Q1680,390 1680,380 Z" fill="#c4b5fd" filter="url(#glow)"/>
+    <path d="M220,480 Q220,490 230,490 Q220,490 220,500 Q220,490 210,490 Q220,490 220,480 Z" fill="#bae6fd" filter="url(#glow)"/>
+    <path d="M1420,520 Q1420,530 1430,530 Q1420,530 1420,540 Q1420,530 1410,530 Q1420,530 1420,520 Z" fill="#fbcfe8" filter="url(#glow)"/>
+
+    <!-- Scattered twinkling stars -->
+    <circle cx="120" cy="140" r="1.5" opacity="0.8"/>
+    <circle cx="180" cy="280" r="1.2" opacity="0.6"/>
+    <circle cx="240" cy="80" r="1" opacity="0.7"/>
+    <circle cx="390" cy="340" r="1.5" opacity="0.85"/>
+    <circle cx="490" cy="110" r="1.2" opacity="0.6"/>
+    <circle cx="580" cy="420" r="1" opacity="0.5"/>
+    <circle cx="710" cy="180" r="1.8" opacity="0.9"/>
+    <circle cx="770" cy="320" r="1.2" opacity="0.7"/>
+    <circle cx="890" cy="90" r="1.5" opacity="0.8"/>
+    <circle cx="940" cy="260" r="1.3" opacity="0.6"/>
+    <circle cx="1020" cy="410" r="1.6" opacity="0.75"/>
+    <circle cx="1180" cy="120" r="1.4" opacity="0.8"/>
+    <circle cx="1290" cy="350" r="1.2" opacity="0.6"/>
+    <circle cx="1370" cy="90" r="1.5" opacity="0.7"/>
+    <circle cx="1460" cy="390" r="1.3" opacity="0.8"/>
+    <circle cx="1590" cy="120" r="1.6" opacity="0.85"/>
+    <circle cx="1640" cy="460" r="1.2" opacity="0.6"/>
+    <circle cx="1740" cy="190" r="1.5" opacity="0.7"/>
+    <circle cx="1810" cy="310" r="1.3" opacity="0.8"/>
+    <circle cx="1860" cy="140" r="1.1" opacity="0.6"/>
+    <circle cx="150" cy="620" r="1.4" opacity="0.5"/>
+    <circle cx="340" cy="710" r="1.2" opacity="0.6"/>
+    <circle cx="720" cy="640" r="1.5" opacity="0.7"/>
+    <circle cx="980" cy="690" r="1.2" opacity="0.5"/>
+    <circle cx="1220" cy="590" r="1.4" opacity="0.65"/>
+    <circle cx="1530" cy="660" r="1.3" opacity="0.6"/>
+    <circle cx="1780" cy="610" r="1.5" opacity="0.7"/>
+  </g>
+</svg>

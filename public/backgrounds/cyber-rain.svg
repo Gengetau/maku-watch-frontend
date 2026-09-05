@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cyberSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#08071a"/>
+      <stop offset="50%" stop-color="#140f2d"/>
+      <stop offset="85%" stop-color="#1f1138"/>
+      <stop offset="100%" stop-color="#2a1240"/>
+    </linearGradient>
+    <radialGradient id="neonPinkBloom" cx="30%" cy="65%" r="40%">
+      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#e11d48" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#08071a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="neonCyanBloom" cx="70%" cy="60%" r="45%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.32"/>
+      <stop offset="50%" stop-color="#0284c7" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#08071a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="neonVioletBloom" cx="50%" cy="40%" r="35%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#08071a" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="rainPattern" width="120" height="120" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+      <line x1="10" y1="0" x2="10" y2="40" stroke="rgba(196, 181, 253, 0.22)" stroke-width="1.2"/>
+      <line x1="60" y1="30" x2="60" y2="85" stroke="rgba(147, 197, 253, 0.2)" stroke-width="1"/>
+      <line x1="100" y1="70" x2="100" y2="115" stroke="rgba(244, 114, 182, 0.18)" stroke-width="1.2"/>
+      <line x1="35" y1="80" x2="35" y2="120" stroke="rgba(167, 139, 250, 0.16)" stroke-width="1"/>
+    </pattern>
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#cyberSky)"/>
+  <rect width="1920" height="1080" fill="url(#neonPinkBloom)"/>
+  <rect width="1920" height="1080" fill="url(#neonCyanBloom)"/>
+  <rect width="1920" height="1080" fill="url(#neonVioletBloom)"/>
+
+  <!-- Distant City Skyline Silhouettes -->
+  <g fill="#0c0a1f" opacity="0.85">
+    <rect x="120" y="420" width="140" height="660"/>
+    <rect x="290" y="360" width="180" height="720"/>
+    <polygon points="380,260 376,360 384,360" fill="#38bdf8" filter="url(#neonGlow)"/>
+    <rect x="500" y="480" width="130" height="600"/>
+    <rect x="660" y="320" width="220" height="760"/>
+    <polygon points="770,220 766,320 774,320" fill="#f43f5e" filter="url(#neonGlow)"/>
+    <rect x="910" y="440" width="150" height="640"/>
+    <rect x="1090" y="380" width="190" height="700"/>
+    <rect x="1310" y="310" width="240" height="770"/>
+    <polygon points="1430,190 1426,310 1434,310" fill="#c084fc" filter="url(#neonGlow)"/>
+    <rect x="1580" y="460" width="160" height="620"/>
+    <rect x="1760" y="400" width="150" height="680"/>
+  </g>
+
+  <!-- Midground Skyline -->
+  <g fill="#070514">
+    <rect x="60" y="560" width="180" height="520"/>
+    <rect x="260" y="520" width="190" height="560"/>
+    <rect x="470" y="580" width="160" height="500"/>
+    <rect x="650" y="480" width="230" height="600"/>
+    <rect x="900" y="540" width="180" height="540"/>
+    <rect x="1100" y="510" width="170" height="570"/>
+    <rect x="1290" y="460" width="210" height="620"/>
+    <rect x="1530" y="530" width="220" height="550"/>
+    <rect x="1770" y="490" width="140" height="590"/>
+  </g>
+
+  <!-- Neon Signs and Window Grids -->
+  <g fill="rgba(254, 240, 138, 0.45)">
+    <!-- Windows cluster 1 -->
+    <rect x="300" y="540" width="6" height="8"/>
+    <rect x="320" y="540" width="6" height="8"/>
+    <rect x="340" y="540" width="6" height="8"/>
+    <rect x="300" y="565" width="6" height="8"/>
+    <rect x="340" y="565" width="6" height="8"/>
+    <rect x="300" y="590" width="6" height="8"/>
+    <rect x="320" y="590" width="6" height="8"/>
+    <rect x="340" y="590" width="6" height="8"/>
+
+    <!-- Windows cluster 2 (cyan) -->
+    <rect x="700" y="510" width="8" height="10" fill="#67e8f9" opacity="0.6"/>
+    <rect x="730" y="510" width="8" height="10" fill="#67e8f9" opacity="0.6"/>
+    <rect x="760" y="510" width="8" height="10" fill="#67e8f9" opacity="0.6"/>
+    <rect x="700" y="535" width="8" height="10" fill="#67e8f9" opacity="0.6"/>
+    <rect x="760" y="535" width="8" height="10" fill="#67e8f9" opacity="0.6"/>
+
+    <!-- Windows cluster 3 (pink) -->
+    <rect x="1330" y="490" width="8" height="10" fill="#f472b6" opacity="0.65"/>
+    <rect x="1360" y="490" width="8" height="10" fill="#f472b6" opacity="0.65"/>
+    <rect x="1390" y="490" width="8" height="10" fill="#f472b6" opacity="0.65"/>
+    <rect x="1330" y="515" width="8" height="10" fill="#f472b6" opacity="0.65"/>
+    <rect x="1360" y="515" width="8" height="10" fill="#f472b6" opacity="0.65"/>
+  </g>
+
+  <!-- Stylized Anime Neon Signs -->
+  <g font-family="monospace, sans-serif" font-weight="900" letter-spacing="4">
+    <!-- Cyan Vertical Sign -->
+    <rect x="490" y="500" width="28" height="110" rx="6" fill="#042f2e" stroke="#14b8a6" stroke-width="2" filter="url(#neonGlow)"/>
+    <text x="504" y="530" fill="#5eead4" font-size="14" text-anchor="middle">幕</text>
+    <text x="504" y="560" fill="#5eead4" font-size="14" text-anchor="middle">友</text>
+    <text x="504" y="590" fill="#5eead4" font-size="13" text-anchor="middle">映</text>
+
+    <!-- Magenta Horizontal Sign -->
+    <rect x="1130" y="460" width="110" height="32" rx="6" fill="#3b0724" stroke="#f43f5e" stroke-width="2" filter="url(#neonGlow)"/>
+    <text x="1185" y="482" fill="#fda4af" font-size="13" text-anchor="middle">MAKU LIVE</text>
+  </g>
+
+  <!-- Wet Street Reflection & Bokeh at bottom -->
+  <rect x="0" y="940" width="1920" height="140" fill="#060410"/>
+  <ellipse cx="500" cy="980" rx="140" ry="25" fill="#14b8a6" opacity="0.18" filter="url(#neonGlow)"/>
+  <ellipse cx="1180" cy="990" rx="160" ry="30" fill="#f43f5e" opacity="0.2" filter="url(#neonGlow)"/>
+  <ellipse cx="1440" cy="980" rx="120" ry="20" fill="#c084fc" opacity="0.15" filter="url(#neonGlow)"/>
+
+  <!-- Rain Layer across the screen -->
+  <rect width="1920" height="1080" fill="url(#rainPattern)" pointer-events="none"/>
+</svg>
