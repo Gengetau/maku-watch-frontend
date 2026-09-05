@@ -40,6 +40,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { AppearanceSettings, useAppearance } from "@/components/appearance-settings";
+
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -949,6 +951,7 @@ function predictedPosition(value: PlaybackState, offset: number): number {
 }
 
 export default function Home() {
+  const appearance = useAppearance();
   const [roomCode, setRoomCode] = useState("");
   const [memberId, setMemberId] = useState("");
   const [room, setRoom] = useState<RoomSnapshot | null>(null);
@@ -2602,12 +2605,12 @@ export default function Home() {
     : "创建一个新房间，或者输入朋友分享的房间码。进入后再选择影片、聊天和同步播放。";
 
   return (
-    <main className={`maku-app ${isPreRoom ? "pre-room" : ""}`} data-room-state={room ? "joined" : activePendingInviteCode ? "invited" : "empty"}>
+    <main style={appearance.style} className={`maku-app ${isPreRoom ? "pre-room" : ""}`} data-room-state={room ? "joined" : activePendingInviteCode ? "invited" : "empty"}>
       <header className="topbar">
         <div className="brand-lockup" aria-label="幕友">
           <span className="brand-mark"><Clapperboard size={19} /></span>
           <span className="brand-name">幕友</span>
-          <span className="brand-sub">MAKU</span>
+          <span className="brand-sub">MAKU · 一起看</span>
         </div>
 
         <nav className="main-nav" aria-label="主导航">
@@ -2617,6 +2620,7 @@ export default function Home() {
         </nav>
 
         <div className="topbar-actions">
+          <AppearanceSettings appearance={appearance} />
           <div className="room-mini-status"><span className={`live-dot ${connectionState === "connected" ? "" : "muted"}`} />{roomCode ? `房间 ${roomCode}` : activePendingInviteCode ? `邀请 ${activePendingInviteCode}` : "未进入房间"}</div>
           <Button className="invite-button" size="sm" onClick={() => openRoomDialog(roomCode ? "invite" : activePendingInviteCode ? "join" : "create")}>
             {roomCode ? <Share2 size={15} /> : <Users size={15} />}
@@ -2642,8 +2646,9 @@ export default function Home() {
       <section className="workspace-shell" id="watch">
         <div className="workspace-heading">
           <div>
+            <div className="hero-kicker"><Sparkles size={14} /> OUR LITTLE ANIME CLUB <span>同じ空の下</span></div>
             <div className="eyebrow"><span className={`live-dot ${connectionState === "connected" ? "" : "muted"}`} />ROOM / {roomCode || activePendingInviteCode || "—"}<span className="eyebrow-divider">·</span><span className="muted-eyebrow">{room ? "实时观影房" : activePendingInviteCode ? "邀请已识别 · 等待加入" : "先创建或加入房间"}</span></div>
-            <h1>{activePendingInviteCode ? `准备加入 ${activePendingInviteCode}` : "今晚看点什么？"}</h1>
+            <h1>{activePendingInviteCode ? `准备加入 ${activePendingInviteCode}` : room ? "故事正在放映，我们一起。" : "下一话，也要一起看。"}</h1>
             <p className="heading-copy">{activePendingInviteCode ? "房间链接有效，输入昵称就可以加入朋友当前的观影进度。" : "和朋友在同一条时间线上，把每一帧都留给一起笑的人。"}</p>
           </div>
           <div className="heading-actions">
@@ -2704,11 +2709,9 @@ export default function Home() {
                   })}
                 </div>
                 {!videoReady && <div className="scene-art" aria-hidden="true">
-                  <div className="scene-grid" />
-                  <div className="scene-orbit orbit-one" />
-                  <div className="scene-orbit orbit-two" />
+                  <Sparkles className="scene-emblem" size={28} />
                   <span className="scene-kicker">{activeEpisode ? "RESOLVING MEDIA" : "Maku Watch"}</span>
-                  <span className="scene-title">{activeMark}</span>
+                  <span className="scene-title">{activeEpisode ? "即将放映" : "我们的放映室"}</span>
                   <span className="scene-caption">{activeEpisode?.name ?? selectedSourceMatch?.title ?? "搜索一部番剧开始"}</span>
                 </div>}
                 {!videoReady && !sourceError && mediaState === "resolving" && <div className="media-status"><LoaderCircle size={17} className="spin" />正在解析片源…</div>}
@@ -2829,7 +2832,7 @@ export default function Home() {
               </div>
               <div className="danmaku-compose-toolbar">
                 <Button type="button" size="sm" variant={danmakuSettings.enabled ? "secondary" : "outline"} className="danmaku-toggle" aria-pressed={danmakuSettings.enabled} onClick={() => updateDanmakuEnabled(!danmakuSettings.enabled)}><Sparkles size={14} />{danmakuSettings.enabled ? "弹幕已开" : "弹幕已关"}</Button>
-                <span className="danmaku-compose-location">发送入口在右侧聊天栏</span>
+                <span className="danmaku-compose-location">在房间消息栏发送，一起聊剧情</span>
               </div>
               <p className="danmaku-hint">弹幕按房间权威播放时间同步，仅保留本次观看期间的消息。</p>
             </section>
@@ -2876,7 +2879,7 @@ export default function Home() {
                 <ScrollArea className="chat-scroll-area">
                   <div className="chat-messages">
                     <div className="chat-system"><span className="system-line" />{room ? "你已进入房间" : "进入房间后开始聊天"}<span className="system-line" /></div>
-                    {chatMessages.length === 0 && <div className="empty-chat"><MessageCircle size={17} /><span>还没有房间消息。</span></div>}
+                    {chatMessages.length === 0 && <div className="empty-chat"><MessageCircle size={17} /><span>把第一句「开播啦」留在这里。</span></div>}
                     {chatMessages.map((message) => <div key={message.id} className={`chat-message ${message.self ? "self" : ""}`}><Avatar size="sm"><AvatarFallback className={message.color}>{message.name.slice(0, 1)}</AvatarFallback></Avatar><div className="message-body"><div className="message-meta"><strong>{message.name}</strong>{message.kind === "danmaku" && <span className="message-kind">弹幕</span>}<span>{message.time}</span></div><p>{message.text}</p></div></div>)}
                   </div>
                 </ScrollArea>
@@ -2954,7 +2957,7 @@ export default function Home() {
           </div>}
         </section>
 
-        <footer className="site-footer"><span>幕友 · 把屏幕变成客厅</span><span className="footer-dot">·</span><span>规则目录与多源设计参考 <a href="https://github.com/Predidit/Kazumi" target="_blank" rel="noreferrer">Kazumi <ArrowUpRight size={12} /></a></span><span className="footer-right">P0 实时观影客户端</span></footer>
+        <footer className="site-footer"><span>幕友 · 把屏幕变成客厅</span><span className="footer-dot">·</span><span>规则目录与多源设计参考 <a href="https://github.com/Predidit/Kazumi" target="_blank" rel="noreferrer">Kazumi <ArrowUpRight size={12} /></a></span><span className="footer-right">同一片星空，同一刻心动</span></footer>
       </section>
 
       <Dialog open={roomDialogOpen} onOpenChange={setRoomDialogOpen}>
